@@ -1,0 +1,42 @@
+app-id: com.ctt.AutoFirma
+runtime: org.freedesktop.Platform
+runtime-version: '21.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk11
+command: AutoFirma
+finish-args:
+  - --share=network
+  - --socket=x11
+  - --share=ipc
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+  - --filesystem=~/.afirma:create
+  - --filesystem=~
+  - --talk-name=org.freedesktop.Flatpak
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk11/install.sh
+  - name: AutoFirma
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+      env:
+        PATH: /app/bin:/usr/bin:/usr/lib/sdk/openjdk11/bin
+        MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
+        JAVA_HOME: /usr/lib/sdk/openjdk11/jvm/openjdk-11
+    build-commands:
+      - install -D -m755 clienteafirma/clienteafirma-1.7.2/afirma-simple-installer/linux/src/usr/bin/AutoFirma /app/bin/AutoFirma
+      - install -D -m644 clienteafirma/clienteafirma-1.7.2/afirma-simple/target/AutoFirma.jar /app/lib/AutoFirma/AutoFirma.jar
+      - install -D -m644 clienteafirma/clienteafirma-1.7.2/afirma-simple-installer/linux/src/usr/lib/AutoFirma/AutoFirma.png /app/share/icons/hicolor/64x64/apps/com.ctt.AutoFirma.png
+      - install -D -m644 clienteafirma/clienteafirma-1.7.2/afirma-simple-installer/linux/src/usr/share/applications/afirma.desktop /app/share/applications/com.ctt.AutoFirma.desktop
+      - sed -i 's|/usr/lib/|/app/lib/|' /app/bin/AutoFirma
+      - sed -i 's|/usr/|/app/|' /app/share/applications/com.ctt.AutoFirma.desktop
+      - sed -i '/^Icon/d' /app/share/applications/com.ctt.AutoFirma.desktop
+      - echo "Icon=/app/share/icons/hicolor/64x64/apps/com.ctt.AutoFirma.png" >> /app/share/applications/com.ctt.AutoFirma.desktop
+    sources:
+      - type: dir
+        path: ./work
